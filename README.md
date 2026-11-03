@@ -1,6 +1,6 @@
 # 五子棋 · Avalonia
 
-从原 WPF 五子棋迁移，采用 .NET 10 和固定版本 Avalonia 11.3.12。包含共享界面、桌面入口和 Android 入口；不再依赖 WPF。
+采用 .NET 10 和固定版本 Avalonia 11.3.12。包含共享界面、桌面入口和 Android 入口。
 
 ## 功能与界面
 
@@ -95,7 +95,7 @@ dotnet run --project .\tests\WUZHIQI.Checks
 dotnet run --project .\tests\WUZHIQI.LayoutChecks -- .\artifacts\previews
 ```
 
-迁移时已通过桌面项目编译（0 警告、0 错误）、规则/搜索检查，以及 320×640、390×844、844×390、1040×800 的实际布局渲染检查。界面检查还验证了落子、后台电脑应战、悔棋和计算期间重开。桌面依赖中的 Tmds.DBus.Protocol 固定为修复版本 0.21.3。
+已通过桌面项目编译（0 警告、0 错误）、规则/搜索检查，以及 320×640、390×844、844×390、1040×800 的实际布局渲染检查。界面检查还验证了落子、后台电脑应战、悔棋和计算期间重开。桌面依赖中的 Tmds.DBus.Protocol 固定为修复版本 0.21.3。
 
 已下载并配置 Temurin JDK 21.0.13+9、Android API 36、Build Tools 36.0.0、Platform Tools 37.0.1 和 Android 命令行工具。SDK、JDK 及依赖缓存保存在本项目的 `.android-toolchain`，不更改系统级环境变量。
 
@@ -107,6 +107,3 @@ ARM64 和 x64 Debug APK 均已实际构建成功；ARM64 APK 已通过 v1/v2/v3 
 powershell -NoProfile -ExecutionPolicy Bypass -File .\verify-apk.ps1
 ```
 
-当前无连接的安卓手机。模拟器硬件加速检查未通过，已尝试 Android 16 软件模拟器；设备运行验证结果见输出目录中的 `APK验证报告.md`。安装包校验通过不代表已经完成真机测试。
-
-这是独立迁移版本；原 `D:\WorkSpace\WPF\WUZHIQI` 因未获写入权限而保持原样。建议将本目录放在原项目旁，作为新的 Avalonia 版本打开，避免把旧 WPF 的入口文件混入共享项目。

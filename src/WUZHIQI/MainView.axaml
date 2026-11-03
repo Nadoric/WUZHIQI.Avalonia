@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="WUZHIQI.MainView" Background="#111827">
+<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+<StackPanel Margin="16" Spacing="16" MaxWidth="1100" HorizontalAlignment="Center">
+  <StackPanel Spacing="3"><TextBlock Text="五子棋" FontSize="30" FontWeight="Bold"/><TextBlock Text="GOMOKU  ·  人机对弈" Foreground="#9CA3AF" FontSize="12"/></StackPanel>
+  <Grid x:Name="GameLayout" RowDefinitions="Auto,Auto" ColumnDefinitions="*">
+    <StackPanel x:Name="BoardPanel" Spacing="10">
+      <Border Background="#1F2937" CornerRadius="10" Padding="14,10"><Grid ColumnDefinitions="*,Auto"><TextBlock x:Name="TurnText" Text="等待开始" FontSize="18" FontWeight="SemiBold"/><TextBlock Grid.Column="1" x:Name="TimeText" Text="00:00" VerticalAlignment="Center" Foreground="#D1D5DB"/></Grid></Border>
+      <Viewbox x:Name="BoardView" Stretch="Uniform" HorizontalAlignment="Center"><Canvas x:Name="BoardCanvas" Width="648" Height="648" Background="#D6A65D" PointerPressed="BoardPressed" PointerReleased="BoardReleased" PointerCaptureLost="BoardCaptureLost"/></Viewbox>
+      <TextBlock x:Name="StatusText" Text="选择设置后，点击开始游戏" TextWrapping="Wrap" Foreground="#FBBF24"/>
+    </StackPanel>
+    <Border x:Name="InfoPanel" Grid.Row="1" Margin="0,16,0,0" Background="#1F2937" CornerRadius="12" Padding="16" VerticalAlignment="Top">
+      <StackPanel Spacing="12">
+        <TextBlock Text="对局设置" FontSize="20" FontWeight="SemiBold"/>
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="12"><Button x:Name="StartButton" Classes="gameAction" Content="开始游戏" Background="#F59E0B" Foreground="#111827" HorizontalAlignment="Stretch" Click="StartClicked"/><Button x:Name="UndoButton" Classes="gameAction" Grid.Column="1" Content="悔棋" HorizontalAlignment="Stretch" Click="UndoClicked"/></Grid>
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="12"><StackPanel Spacing="6"><TextBlock Text="我的棋子" Foreground="#9CA3AF"/><ComboBox x:Name="ColorBox" SelectedIndex="0"><ComboBoxItem Content="黑棋 · 先手"/><ComboBoxItem Content="白棋 · 后手"/></ComboBox></StackPanel><StackPanel Grid.Column="1" Spacing="6"><TextBlock Text="电脑难度" Foreground="#9CA3AF"/><ComboBox x:Name="DifficultyBox" SelectedIndex="6"><ComboBoxItem Content="简单"/><ComboBoxItem Content="普通"/><ComboBoxItem Content="困难"/><ComboBoxItem Content="专家"/><ComboBoxItem Content="大师"/><ComboBoxItem Content="地狱"/><ComboBoxItem Content="炼狱"/></ComboBox></StackPanel></Grid>
+        <TextBlock x:Name="MovesText" Text="落子数  0" Foreground="#D1D5DB"/>
+        <TextBlock Text="连续五子获胜。轻触交叉点落子，红圈标记电脑最近一步。修改设置后重新开始生效。" FontSize="12" Foreground="#9CA3AF" TextWrapping="Wrap"/>
+      </StackPanel>
+    </Border>
+  </Grid>
+</StackPanel>
+</ScrollViewer></UserControl>

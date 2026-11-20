@@ -1,10 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
+    <ApplicationIcon>../WUZIQI/Assets/app.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../WUZHIQI/WUZHIQI.csproj" />
+    <ProjectReference Include="../WUZIQI/WUZIQI.csproj" />
     <PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
     <PackageReference Include="Tmds.DBus.Protocol" Version="0.21.3" />
   </ItemGroup>

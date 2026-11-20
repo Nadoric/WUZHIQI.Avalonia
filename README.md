@@ -1,109 +1,104 @@
-# 五子棋 · Avalonia
+# WUZIQI · 五子棋
 
-采用 .NET 10 和固定版本 Avalonia 11.3.12。包含共享界面、桌面入口和 Android 入口。
+采用 .NET 11 和 Avalonia 11.3.12，共用一套棋局逻辑与界面，支持 Windows 桌面和 Android 手机。
 
-## 功能与界面
+## 下载
 
-- 保留 15×15 棋盘、黑白先后手、七档电脑难度、计时、悔棋、胜负判定与电脑最近落子标记。
-- 手机竖屏采用棋盘在上、设置在下的布局；窄屏和横屏可纵向滚动。宽度达到 820 时切换到左右布局。
-- 棋盘按可用宽度等比缩放，棋盘四周留有边距，边缘棋子完整显示。按钮和选择框最小高度为 48。
-- 松手落子，拖动滚动不会落子；电脑在后台搜索。重新开始、悔棋或离开界面会取消旧搜索，旧结果不会写入新棋局。
-- 默认炼狱难度，可自行切换其他难度。采用迭代加深、Alpha-Beta 剪枝、局面缓存和四条线增量估值；炼狱的搜索预算为 900 毫秒，普通开局和直接胜负会提前返回。
-- 应用内置 Noto Sans CJK SC 常规和粗体字体，标题、回合和按钮使用同一套中文字体，避免系统字体回退缺字。字体许可证位于 `src/WUZHIQI/Assets/Fonts/LICENSE.txt`。
-- 开始／重新开始和悔棋按钮采用 20 字号粗体，并在按钮内水平、垂直居中。
-- 电脑在前中期优先争胜，识别双成五点和带空位的进攻形状。实际落子达到 180 子后放宽防守，203 子后进一步给玩家保留成五机会。让步只影响合法落点的选择，不改已有棋子和胜负规则；如果棋形已没有成五空间，仍可能和棋。
-- Android 15 及以上应用系统栏与刘海安全边距。旋转屏幕由同一个 Activity 处理。进程被系统终止后不恢复对局，当前版本不含存档功能。
-- Android 绘图库使用 SkiaSharp 3.119.4，兼容 16 KB 内存页；调试 APK 内嵌全部运行程序集，可直接安装，无需电脑部署额外文件。
+在 [Releases](https://github.com/Nadoric/WUZHIQI.Avalonia/releases) 下载正式版本：
 
-## 运行桌面版
+- **Windows x64**：解压 `WUZIQI-Windows-x64-Release.zip` 后运行 `WUZIQI.Desktop.exe`，需要 .NET 11 x64 运行时或 SDK。
+- **Android ARM64**：安装 `WUZIQI-android-arm64-release.apk`，支持 Android 7.0（API 24）及以上的 64 位 ARM 设备。
+- `SHA256SUMS.txt` 提供安装包校验值。
 
-安装 .NET 10 SDK，在此目录运行：
+新版 Android 包名为 `com.wuziqi.gomoku`。与旧包名的版本作为不同应用安装。
 
-```powershell
-dotnet run --project .\src\WUZHIQI.Desktop
-```
+## 功能
 
-也可以在 Visual Studio 中打开 `WUZHIQI.slnx`，将 `WUZHIQI.Desktop` 设为启动项目。只运行桌面项目不需要 Android 环境。
+- 15×15 棋盘，支持执黑先手、执白后手、计时、悔棋和胜负标记。
+- 七档电脑难度，默认炼狱。采用迭代加深、Alpha-Beta 剪枝、局面缓存和增量估值，炼狱思考预算约 900 毫秒。
+- 前中期积极争胜，识别双成五点及带空位的进攻棋形；达到 180 子后放宽防守，203 子后进一步保留玩家取胜机会。棋形已无法成五时仍可能和棋。
+- **黑棋禁手默认开启**，可通过复选框关闭。棋色、难度和禁手开关均在重新开始后生效。
+- 手机竖屏上下布局，宽屏左右布局；棋盘等比缩放、支持触控和纵向滚动。拖动滚动不会落子。
+- 内置中文常规和粗体字体；操作按钮文字放大并居中；电脑端包含多尺寸程序图标及窗口图标。
+- 电脑在后台搜索，悔棋、重开或离开界面时取消旧计算。当前版本不含存档，系统终止进程后不恢复对局。
 
-## 生成可安装 APK
+![手机界面](previews/layout-390x844.png)
 
-需要 .NET 10 SDK、.NET Android 工作负载、JDK 21，以及含 Android API 36 平台、platform-tools 和对应 build-tools 的 Android SDK。可通过 Visual Studio 的 Android 开发组件和 Android SDK 管理器配置，或使用 Android Studio SDK 管理器安装 SDK。
+## 黑棋禁手
 
-首次安装工作负载（可能需要管理员终端）：
+开启时，黑棋禁止三三、四四和长连，白棋无禁手：
+
+- 玩家执黑点击禁手点时，不落子、不切换回合，并提示具体原因。
+- 电脑执黑的候选落点、搜索分支、战术分析和后期让步都会排除禁手。
+- 长连始终禁止；恰好五连优先于三三、四四。
+- 活四的两个成五点只计一个四，同方向的不同四可以构成四四。
+- 活三必须能通过合法落子形成两端均可合法成五的活四，递归排除边缘、封堵、长连或禁手延伸导致的假活三。
+- 黑棋没有合法落点时白棋获胜。
+
+关闭禁手后，黑白双方都按连续五子及以上获胜。三、四的形状及假活三定义参考 [RIF 规则](https://www.renju.net/rifrules/)；本应用采用阻止禁手落子的交互及长连始终禁落的约定，不包含比赛开局交换与停着规则。
+
+## 开发环境
+
+- .NET 11 SDK；项目使用 `global.json` 选择 11.0 系列 SDK。
+- Android 开发另需 `android` 工作负载、JDK 21、Android SDK API 37、Build Tools 37.0.0 和 platform-tools。
 
 ```powershell
 dotnet workload install android
+dotnet run --project .\src\WUZIQI.Desktop
 ```
 
-设置环境变量 `ANDROID_HOME`、`JAVA_HOME` 后双击 `build-apk.cmd`，或运行：
+也可打开 `WUZIQI.slnx`，选择 `WUZIQI.Desktop` 或 `WUZIQI.Android` 为启动项目。只运行桌面版不需要 Android 环境。
+
+## 打包
+
+Windows x64（依赖 .NET 11 运行时）：
 
 ```powershell
-.\build-apk.cmd
+dotnet publish .\src\WUZIQI.Desktop -c Release -r win-x64 --self-contained false -o .\artifacts\desktop\win-x64
 ```
 
-本次工作目录已下载并配置所需环境，直接双击即可。`android-build.local.json` 保存本机 SDK、JDK 和 NuGet 缓存路径，脚本会自动读取；该文件不包含在源码压缩包中。在其他电脑上请设置环境变量或传入实际路径。Debug 签名文件自动保存在 `artifacts/keys/debug.keystore`，请保留它以便覆盖安装后续调试版本。
-
-也可明确指定路径（以下路径请替换为实际安装位置）：
+Android 调试包：设置 `ANDROID_HOME`、`JAVA_HOME` 后运行 `build-apk.cmd`，也可指定路径：
 
 ```powershell
 .\build-apk.cmd -AndroidSdkDirectory "D:\Android\Sdk" -JavaSdkDirectory "D:\Java\jdk-21"
 ```
 
-默认生成 **ARM64 Debug 已签名 APK**，适合个人安卓手机测试安装，输出到：
+脚本也支持读取未纳入版本控制的 `android-build.local.json`。默认输出为 `artifacts/apk/Debug/android-arm64/*-Signed.apk`，模拟器可传 `-Runtime android-x64`。
+
+Android 正式签名：
+
+```powershell
+keytool -genkeypair -keystore wuziqi.keystore -alias wuziqi -keyalg RSA -keysize 3072 -validity 10000
+```
+
+在当前终端设置 `WUZIQI_KEY_PASSWORD` 和 `WUZIQI_STORE_PASSWORD`，再运行：
+
+```powershell
+.\build-apk.cmd -Configuration Release -KeyStore .\wuziqi.keystore -KeyAlias wuziqi
+```
+
+正式包输出到 `artifacts/apk/Release/android-arm64`。密码通过环境变量传给构建工具；签名密钥、本机配置、SDK 和构建缓存不纳入版本控制。后续正式版需使用同一签名密钥；调试包和正式包签名不同，切换时需要卸载原包。
+
+## 检查
+
+```powershell
+dotnet run --project .\tests\WUZIQI.Checks -c Release
+dotnet run --project .\tests\WUZIQI.LayoutChecks -c Release -- .\artifacts\previews
+powershell -NoProfile -ExecutionPolicy Bypass -File .\verify-apk.ps1 -ApkPath .\artifacts\apk\Release\android-arm64\com.wuziqi.gomoku-Signed.apk
+```
+
+规则检查覆盖攻防、悔棋、取消、分阶段策略、三类禁手、八种对称棋形、假活三、白棋豁免、无合法落点、七档电脑合法落子和禁手关闭行为。界面检查覆盖四种屏幕尺寸、中文字体、后台电脑应战、禁手提示及开关。
+
+## 目录
 
 ```text
-artifacts/apk/Debug/android-arm64/*-Signed.apk
+src/WUZIQI/                 共享界面、棋局、禁手规则和电脑搜索
+src/WUZIQI.Desktop/         桌面入口
+src/WUZIQI.Android/         Android 入口、Manifest、主题和图标
+tests/WUZIQI.Checks/        棋局、搜索与禁手检查
+tests/WUZIQI.LayoutChecks/  字体、布局及界面交互检查
+build-apk.ps1               APK 构建和签名
+verify-apk.ps1              APK 签名、对齐与 Manifest 检查
 ```
 
-模拟器可传 `-Runtime android-x64`；32 位 ARM 手机可传 `-Runtime android-arm`。安装到手机时允许该来源安装应用，或用 `adb install -r <APK路径>`。
-
-## 正式签名 APK
-
-先使用 JDK 自带 keytool 创建自己的签名文件，按提示设置密码，并妥善备份：
-
-```powershell
-keytool -genkeypair -keystore wuzhiqi.keystore -alias wuzhiqi -keyalg RSA -keysize 2048 -validity 10000
-```
-
-在当前终端设置 `WUZHIQI_KEY_PASSWORD`、`WUZHIQI_STORE_PASSWORD` 环境变量，再运行：
-
-```powershell
-.\build-apk.cmd -Configuration Release -KeyStore .\wuzhiqi.keystore -KeyAlias wuzhiqi
-```
-
-密码通过环境变量传给 Android 构建工具。脚本不会把密码写入项目或命令参数。正式包位于 `artifacts/apk/Release/android-arm64`。Debug 与正式签名不同，切换签名安装前需要卸载旧包。
-
-构建脚本参考 [Avalonia Android 发布说明](https://docs.avaloniaui.net/docs/deployment/android)。
-
-## 项目结构
-
-```text
-src/WUZHIQI/                 共享 Avalonia 界面与独立棋局、电脑搜索
-src/WUZHIQI.Desktop/         Windows/Linux/macOS 桌面入口
-src/WUZHIQI.Android/         Android Activity、Manifest、主题、图标
-tests/WUZHIQI.Checks/        不依赖 UI 的规则和搜索检查
-tests/WUZHIQI.LayoutChecks/  实际界面渲染、布局和交互检查
-build-apk.ps1                APK 构建与签名脚本
-build-apk.cmd                Windows 双击入口
-verify-apk.ps1               APK 签名、16 KB ZIP 对齐和 Manifest 校验
-```
-
-## 验证
-
-```powershell
-dotnet run --project .\tests\WUZHIQI.Checks
-dotnet run --project .\tests\WUZHIQI.LayoutChecks -- .\artifacts\previews
-```
-
-已通过桌面项目编译（0 警告、0 错误）、规则/搜索检查，以及 320×640、390×844、844×390、1040×800 的实际布局渲染检查。界面检查还验证了落子、后台电脑应战、悔棋和计算期间重开。桌面依赖中的 Tmds.DBus.Protocol 固定为修复版本 0.21.3。
-
-已下载并配置 Temurin JDK 21.0.13+9、Android API 36、Build Tools 36.0.0、Platform Tools 37.0.1 和 Android 命令行工具。SDK、JDK 及依赖缓存保存在本项目的 `.android-toolchain`，不更改系统级环境变量。
-
-ARM64 和 x64 Debug APK 均已实际构建成功；ARM64 APK 已通过 v1/v2/v3 签名校验、Manifest 读取、16 KB ZIP 对齐，以及全部 295 个 ELF 库的内存段对齐检查。也确认游戏和 Android 入口程序集包含在 APK 中。
-
-可随时重新校验：
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\verify-apk.ps1
-```
-
+内置字体采用 SIL Open Font License 1.1，完整许可见 [字体许可证](src/WUZIQI/Assets/Fonts/LICENSE.txt)。

@@ -3,7 +3,7 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Views;
 using Avalonia.Android;
-namespace WUZHIQI.Android;
+namespace WUZIQI.Android;
 [Activity(Label="五子棋", Theme="@style/AppTheme", Icon="@drawable/icon", MainLauncher=true, Exported=true,
     ConfigurationChanges=ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
 public class MainActivity : AvaloniaMainActivity<App>

@@ -6,7 +6,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 try {
-    if (-not $ApkPath) { $ApkPath = Join-Path $PSScriptRoot 'artifacts\apk\Debug\android-arm64\com.wuzhiqi.gomoku-Signed.apk' }
+    if (-not $ApkPath) { $ApkPath = Join-Path $PSScriptRoot 'artifacts\apk\Debug\android-arm64\com.wuziqi.gomoku-Signed.apk' }
     $configPath = Join-Path $PSScriptRoot 'android-build.local.json'
     if (Test-Path -LiteralPath $configPath) {
         $local = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -16,7 +16,7 @@ try {
     if (-not (Test-Path -LiteralPath $ApkPath -PathType Leaf)) { throw "找不到 APK：$ApkPath" }
     if (-not $JavaSdkDirectory -or -not $AndroidSdkDirectory) { throw '请指定 Android SDK 和 JDK 路径。' }
     $env:JAVA_HOME = $JavaSdkDirectory
-    $tools = Join-Path $AndroidSdkDirectory 'build-tools\36.0.0'
+    $tools = Join-Path $AndroidSdkDirectory 'build-tools\37.0.0'
     & (Join-Path $tools 'apksigner.bat') verify --verbose --print-certs $ApkPath
     if ($LASTEXITCODE -ne 0) { throw 'APK 签名校验失败。' }
     & (Join-Path $tools 'zipalign.exe') -c -P 16 4 $ApkPath

@@ -1,4 +1,4 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="WUZHIQI.MainView" Background="#111827">
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="WUZIQI.MainView" Background="#111827">
 <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 <StackPanel Margin="16" Spacing="16" MaxWidth="1100" HorizontalAlignment="Center">
   <StackPanel Spacing="3"><TextBlock Text="五子棋" FontSize="30" FontWeight="Bold"/><TextBlock Text="GOMOKU  ·  人机对弈" Foreground="#9CA3AF" FontSize="12"/></StackPanel>
@@ -13,8 +13,26 @@
         <TextBlock Text="对局设置" FontSize="20" FontWeight="SemiBold"/>
         <Grid ColumnDefinitions="*,*" ColumnSpacing="12"><Button x:Name="StartButton" Classes="gameAction" Content="开始游戏" Background="#F59E0B" Foreground="#111827" HorizontalAlignment="Stretch" Click="StartClicked"/><Button x:Name="UndoButton" Classes="gameAction" Grid.Column="1" Content="悔棋" HorizontalAlignment="Stretch" Click="UndoClicked"/></Grid>
         <Grid ColumnDefinitions="*,*" ColumnSpacing="12"><StackPanel Spacing="6"><TextBlock Text="我的棋子" Foreground="#9CA3AF"/><ComboBox x:Name="ColorBox" SelectedIndex="0"><ComboBoxItem Content="黑棋 · 先手"/><ComboBoxItem Content="白棋 · 后手"/></ComboBox></StackPanel><StackPanel Grid.Column="1" Spacing="6"><TextBlock Text="电脑难度" Foreground="#9CA3AF"/><ComboBox x:Name="DifficultyBox" SelectedIndex="6"><ComboBoxItem Content="简单"/><ComboBoxItem Content="普通"/><ComboBoxItem Content="困难"/><ComboBoxItem Content="专家"/><ComboBoxItem Content="大师"/><ComboBoxItem Content="地狱"/><ComboBoxItem Content="炼狱"/></ComboBox></StackPanel></Grid>
+        <CheckBox x:Name="ForbiddenRulesBox"
+                  IsChecked="True"
+                  MinHeight="44"
+                  Padding="8,0,0,0"
+                  VerticalContentAlignment="Center">
+            <CheckBox.Resources>
+                <x:Double x:Key="CheckBoxMinHeight">44</x:Double>
+            </CheckBox.Resources>
+            <TextBlock Text="开启黑棋禁手"
+                       FontSize="14"
+                       Height="20"
+                       LineHeight="20"
+                       VerticalAlignment="Center">
+                <TextBlock.RenderTransform>
+                    <TranslateTransform Y="-0.5" />
+                </TextBlock.RenderTransform>
+            </TextBlock>
+        </CheckBox>
         <TextBlock x:Name="MovesText" Text="落子数  0" Foreground="#D1D5DB"/>
-        <TextBlock Text="连续五子获胜。轻触交叉点落子，红圈标记电脑最近一步。修改设置后重新开始生效。" FontSize="12" Foreground="#9CA3AF" TextWrapping="Wrap"/>
+        <TextBlock Text="禁手开启时，黑棋禁三三、四四和长连；白棋无禁手。更改设置后重新开始生效。" FontSize="12" Foreground="#9CA3AF" TextWrapping="Wrap"/>
       </StackPanel>
     </Border>
   </Grid>

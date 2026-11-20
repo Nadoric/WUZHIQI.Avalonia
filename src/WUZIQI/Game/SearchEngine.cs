@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace WUZHIQI.Game
+namespace WUZIQI.Game
 {
     public enum Difficulty
     {
@@ -38,6 +38,7 @@ namespace WUZHIQI.Game
         private readonly CancellationToken cancellation;
         private readonly int computer;
         private readonly Difficulty difficulty;
+        private readonly bool forbiddenRulesEnabled;
         private readonly Profile profile;
         private int evaluation;
         private int stones;
@@ -74,11 +75,13 @@ namespace WUZHIQI.Game
             int[,] snapshot,
             int computer,
             Difficulty difficulty,
-            CancellationToken cancellation = default)
+            CancellationToken cancellation = default,
+            bool forbiddenRulesEnabled = true)
         {
             board = (int[,])snapshot.Clone();
             this.computer = computer;
             this.difficulty = difficulty;
+            this.forbiddenRulesEnabled = forbiddenRulesEnabled;
             this.cancellation = cancellation;
             profile = difficulty switch
             {
@@ -130,7 +133,7 @@ namespace WUZHIQI.Game
 
             if (candidates.Count == 0)
             {
-                throw new InvalidOperationException("棋盘上没有可落子的位置。");
+                return (-1, -1);
             }
 
             if (IsLateGameAssistanceActive)
@@ -249,6 +252,9 @@ namespace WUZHIQI.Game
 
                 try
                 {
+                    var rules = computer == 1 && forbiddenRulesEnabled
+                        ? RenjuRules.CreateBlackMoveEvaluator(board, cancellation)
+                        : null;
                     var continuations = 0;
 
                     for (var row = 0; row < Size; row++)
@@ -257,7 +263,9 @@ namespace WUZHIQI.Game
 
                         for (var column = 0; column < Size; column++)
                         {
-                            if (!IsEmpty(row, column) || neighbors[row, column] == 0)
+                            if (!IsEmpty(row, column) || neighbors[row, column] == 0
+                                || (rules is not null
+                                    && rules.GetForbiddenMove(row, column) != ForbiddenMove.None))
                             {
                                 continue;
                             }
@@ -311,6 +319,9 @@ namespace WUZHIQI.Game
 
                 Play(move.Row, move.Column, computer);
                 var playerOpportunity = 0;
+                var replyRules = computer == 2 && forbiddenRulesEnabled
+                    ? RenjuRules.CreateBlackMoveEvaluator(board, cancellation)
+                    : null;
 
                 try
                 {
@@ -320,7 +331,9 @@ namespace WUZHIQI.Game
 
                         for (var column = 0; column < Size; column++)
                         {
-                            if (IsEmpty(row, column))
+                            if (IsEmpty(row, column)
+                                && (replyRules is null
+                                    || replyRules.GetForbiddenMove(row, column) == ForbiddenMove.None))
                             {
                                 playerOpportunity = Math.Max(
                                     playerOpportunity,
@@ -391,7 +404,7 @@ namespace WUZHIQI.Game
 
             if (moves.Count == 0)
             {
-                return 0;
+                return maximizing ? -WinScore + stones : WinScore - stones;
             }
 
             if (moves[0].Attack >= 1_000_000)
@@ -446,31 +459,54 @@ namespace WUZHIQI.Game
         private List<Candidate> GenerateMoves(int player, bool limited)
         {
             var result = new List<Candidate>(64);
+            var rules = forbiddenRulesEnabled
+                ? RenjuRules.CreateBlackMoveEvaluator(board, cancellation)
+                : null;
+            Collect(true);
 
-            for (var row = 0; row < Size; row++)
+            // 邻近点全部被禁手排除时，仍需允许电脑选择棋盘上的其他合法空位。
+            if (result.Count == 0)
             {
-                cancellation.ThrowIfCancellationRequested();
-
-                if (limited)
-                {
-                    CheckBudget();
-                }
-
-                for (var column = 0; column < Size; column++)
-                {
-                    if (board[row, column] == 0 && neighbors[row, column] > 0)
-                    {
-                        result.Add(new Candidate(
-                            row,
-                            column,
-                            MoveScore(row, column, player),
-                            MoveScore(row, column, 3 - player)));
-                    }
-                }
+                Collect(false);
             }
 
             result.Sort((left, right) => right.Priority.CompareTo(left.Priority));
             return result;
+
+            void Collect(bool nearbyOnly)
+            {
+                for (var row = 0; row < Size; row++)
+                {
+                    cancellation.ThrowIfCancellationRequested();
+
+                    for (var column = 0; column < Size; column++)
+                    {
+                        if (board[row, column] != 0 || (nearbyOnly && neighbors[row, column] == 0))
+                        {
+                            continue;
+                        }
+
+                        if (limited)
+                        {
+                            CheckBudget();
+                        }
+
+                        var blackLegal = rules is null
+                            || rules.GetForbiddenMove(row, column) == ForbiddenMove.None;
+
+                        if (player == 1 && !blackLegal)
+                        {
+                            continue;
+                        }
+
+                        var attack = MoveScore(row, column, player);
+                        var defense = player == 2 && !blackLegal
+                            ? 0
+                            : MoveScore(row, column, 3 - player);
+                        result.Add(new Candidate(row, column, attack, defense));
+                    }
+                }
+            }
         }
 
         private int MoveScore(int row, int column, int player)

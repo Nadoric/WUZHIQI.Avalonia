@@ -1,4 +1,4 @@
-using WUZHIQI.Game;
+using WUZIQI.Game;
 static void Check(bool condition, string message) { if (!condition) throw new Exception(message); }
 var g = new GameSession();
 Check(!g.Place(7,7), "Cannot play before start");
@@ -137,3 +137,5 @@ Check(
     new SearchEngine(lastCellBoard, 2, Difficulty.Inferno).FindComputerMove() == (7, 7),
     "Last available intersection must remain playable");
 Console.WriteLine("PASS: attacking fork, 179/180/203 stone stages, legal assistance and last cell");
+
+WUZIQI.Tests.ForbiddenChecks.Run();

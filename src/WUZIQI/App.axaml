@@ -1,11 +1,11 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="WUZHIQI.App"
+             x:Class="WUZIQI.App"
              RequestedThemeVariant="Dark">
     <Application.Resources>
         <!-- 同时内置常规、粗体中文字体，避免不同手机的系统字体回退缺字。 -->
-        <FontFamily x:Key="ChineseFont">avares://WUZHIQI/Assets/Fonts#Noto Sans CJK SC</FontFamily>
-        <FontFamily x:Key="ContentControlThemeFontFamily">avares://WUZHIQI/Assets/Fonts#Noto Sans CJK SC</FontFamily>
+        <FontFamily x:Key="ChineseFont">avares://WUZIQI/Assets/Fonts#Noto Sans CJK SC</FontFamily>
+        <FontFamily x:Key="ContentControlThemeFontFamily">avares://WUZIQI/Assets/Fonts#Noto Sans CJK SC</FontFamily>
     </Application.Resources>
     <Application.Styles>
         <FluentTheme />

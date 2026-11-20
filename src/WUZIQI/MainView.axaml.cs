@@ -7,8 +7,8 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using WUZHIQI.Game;
-namespace WUZHIQI;
+using WUZIQI.Game;
+namespace WUZIQI;
 public partial class MainView : UserControl
 {
     private const double Cell = 600.0 / 14, Pad = 24;
@@ -45,7 +45,9 @@ public partial class MainView : UserControl
     }
     private void StartClicked(object? sender, RoutedEventArgs e)
     {
-        CancelSearch(); game.Start(ColorBox.SelectedIndex == 1 ? 2 : 1);
+        CancelSearch(); game.Start(
+            ColorBox.SelectedIndex == 1 ? 2 : 1,
+            ForbiddenRulesBox.IsChecked != false);
         activeDifficulty = (Difficulty)Math.Clamp(DifficultyBox.SelectedIndex,0,6);
         elapsed.Restart(); timer.Start(); TimeText.Text = "00:00:00";
         StartButton.Content = "重新开始"; UpdateStatus(); Draw(); ResumeComputer();
@@ -69,20 +71,43 @@ public partial class MainView : UserControl
         // Releasing after a scroll/drag must not place a stone.
         if (Math.Abs(p.X-start.Value.X) > Cell/2 || Math.Abs(p.Y-start.Value.Y) > Cell/2) return;
         if (game.Place((int)Math.Round((p.Y-Pad)/Cell), (int)Math.Round((p.X-Pad)/Cell)))
-        { Draw(); UpdateStatus(); ResumeComputer(); }
+        {
+            Draw();
+            UpdateStatus();
+            ResumeComputer();
+        }
+        else if (game.LastForbiddenMove != ForbiddenMove.None)
+        {
+            StatusText.Text = RenjuRules.GetMessage(game.LastForbiddenMove);
+        }
     }
     private async void ResumeComputer()
     {
         if (!game.Started || game.Over || game.Current != game.Computer || thinking || !this.IsAttachedToVisualTree()) return;
         thinking = true; var version = generation;
         search?.Dispose(); search = new CancellationTokenSource(); var token = search.Token;
-        var snapshot = game.Snapshot(); var computer = game.Computer; var level = activeDifficulty;
+        var snapshot = game.Snapshot();
+        var computer = game.Computer;
+        var level = activeDifficulty;
+        var forbiddenRulesEnabled = game.ForbiddenRulesEnabled;
         UpdateStatus();
         try
         {
-            var move = await Task.Run(() => new SearchEngine(snapshot, computer, level, token).FindComputerMove(), token);
+            var move = await Task.Run(() => new SearchEngine(snapshot, computer, level, token, forbiddenRulesEnabled).FindComputerMove(), token);
             if (version != generation || token.IsCancellationRequested) return;
-            thinking = false; game.Place(move.Row,move.Column); Draw(); UpdateStatus();
+            thinking = false;
+
+            if (move.Row < 0)
+            {
+                game.FinishIfNoLegalMoves();
+            }
+            else if (!game.Place(move.Row, move.Column))
+            {
+                throw new InvalidOperationException("电脑返回了非法落点。");
+            }
+
+            Draw();
+            UpdateStatus();
         }
         catch (OperationCanceledException) { }
         catch (Exception)
